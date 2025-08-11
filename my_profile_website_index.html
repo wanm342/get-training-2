@@ -1,0 +1,138 @@
+<!--
+README: Laman Web Profil Peribadi (fail tunggal: index.html)
+
+Cara guna:
+1) Simpan sebagai `index.html` dalam folder `my-profile-website/`.
+2) Jika mahu fail berasingan, potong bahagian <style> ke `style.css` dan <script> ke `script.js`.
+3) Arahan Git asas (dari dalam folder projek):
+   git init
+   git add .
+   git commit -m "Tambah laman profil — versi awal"
+   git branch -M main
+   (optional) git remote add origin https://github.com/USERNAME/my-profile-website.git
+   git push -u origin main
+
+Fail ini termasuk: header, imej placeholder, bahagian tentang, kemahiran, butang tukar tema (light/dark), dan komen arahan Git.
+-->
+
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profil Peribadi — Nama Anda</title>
+
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#111827; --card:#f3f4f6; --accent:#2563eb;
+    }
+    [data-theme="dark"]{ --bg:#0b1220; --fg:#e6eef8; --card:#0f1724; --accent:#60a5fa }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:var(--bg);color:var(--fg);line-height:1.5}
+    .container{max-width:900px;margin:32px auto;padding:20px}
+
+    header{display:flex;gap:20px;align-items:center}
+    .avatar{width:120px;height:120px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7dd3fc);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:28px}
+    h1{margin:0;font-size:28px}
+    p.lead{margin:6px 0 0;color:rgba(0,0,0,0.6)}
+    [data-theme="dark"] p.lead{color:rgba(230,238,248,0.7)}
+
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-top:20px}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+
+    .skills{display:flex;flex-wrap:wrap;gap:8px}
+    .skill{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.06);font-size:13px}
+    [data-theme="dark"] .skill{background:rgba(255,255,255,0.04)}
+
+    footer{margin-top:20px;text-align:center;color:rgba(0,0,0,0.5);font-size:13px}
+
+    .controls{margin-left:auto;display:flex;gap:8px}
+    button{background:transparent;border:1px solid rgba(0,0,0,0.08);padding:8px 10px;border-radius:8px;cursor:pointer}
+    [data-theme="dark"] button{border-color:rgba(255,255,255,0.06)}
+
+    @media (max-width:720px){.grid{grid-template-columns:1fr}.avatar{width:96px;height:96px}}
+  </style>
+</head>
+
+<body data-theme="light">
+  <div class="container">
+    <header>
+      <div class="avatar">NA</div>
+      <div>
+        <h1>Nama Anda</h1>
+        <p class="lead">Pembangun web • Hobi: UI/UX • Lokasi: Malaysia</p>
+      </div>
+
+      <div class="controls">
+        <button id="themeBtn" aria-label="Tukar tema">Tukar Tema</button>
+        <button id="downloadBtn">Muat Turun CV</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <main class="card">
+        <h2>Tentang Saya</h2>
+        <p>Hai! Saya seorang pembangun web yang berminat dengan rekabentuk antaramuka dan pengalaman pengguna. Projek ini adalah contoh ringkas untuk belajar Git dan host laman statik.</p>
+
+        <h3>Projek Contoh</h3>
+        <ul>
+          <li>Laman profil peribadi (ini)</li>
+          <li>Portfolio ringkas</li>
+          <li>Aplikasi nota kecil menggunakan JavaScript</li>
+        </ul>
+
+        <h3>Hubungi</h3>
+        <p>Email: nama@example.com</p>
+      </main>
+
+      <aside class="card">
+        <h3>Kemahiran</h3>
+        <div class="skills">
+          <span class="skill">HTML</span>
+          <span class="skill">CSS</span>
+          <span class="skill">JavaScript</span>
+          <span class="skill">Git</span>
+          <span class="skill">React (asas)</span>
+        </div>
+
+        <h3 style="margin-top:14px">Ringkasan Git</h3>
+        <ol>
+          <li><strong>git init</strong> — mula repo</li>
+          <li><strong>git add</strong> — masukkan fail untuk disimpan</li>
+          <li><strong>git commit</strong> — simpan snapshot</li>
+          <li><strong>git branch</strong> &amp; <strong>git merge</strong> — kerja pada cabang, gabungkan</li>
+        </ol>
+      </aside>
+    </div>
+
+    <footer>
+      Dibina dengan ❤️ — Belajar Git langkah demi langkah
+    </footer>
+  </div>
+
+  <script>
+    // ringkas: tukar tema dan muat turun fail CV palsu
+    const themeBtn = document.getElementById('themeBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    themeBtn.addEventListener('click', ()=>{
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme') || 'light';
+      const next = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? 'Tema Gelap' : 'Tema Terang';
+    });
+
+    downloadBtn.addEventListener('click', ()=>{
+      const cv = `Nama Anda\nPembangun Web\nEmail: nama@example.com\n\nRingkasan:\n- HTML, CSS, JS\n- Git\n`;
+      const blob = new Blob([cv], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'CV-NamaAnda.txt';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
