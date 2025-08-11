@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Form</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .login-container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        width: 300px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #007bff;
+        border: none;
+        color: white;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    .error {
+        color: red;
+        font-size: 12px;
+    }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <div id="errorMsg" class="error"></div>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('loginForm');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        errorMsg.textContent = "";
+
+        if (email.value.trim() === "" || password.value.trim() === "") {
+            errorMsg.textContent = "All fields are required!";
+            return;
+        }
+
+        if (!email.value.includes("@")) {
+            errorMsg.textContent = "Please enter a valid email!";
+            return;
+        }
+
+        // Simulate login (replace with real backend request)
+        if (email.value === "admin@example.com" && password.value === "123456") {
+            alert("Login successful!");
+        } else {
+            errorMsg.textContent = "Invalid email or password!";
+        }
+    });
+</script>
+
+</body>
+</html>
