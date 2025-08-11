@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventory Form</title>
+  <style>
+    :root { --bg:#ffffff; --fg:#111827; --card:#f3f4f6; --accent:#2563eb; --muted:#6b7280; }
+    [data-theme="dark"] { --bg:#0b1220; --fg:#e6eef8; --card:#0f1724; --accent:#60a5fa; --muted:#9aa8bd }
+
+    * { box-sizing: border-box }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background: var(--bg); color: var(--fg); line-height: 1.5 }
+    .container { max-width: 1100px; margin: 32px auto; padding: 20px }
+
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px }
+    h1 { font-size: 24px; margin: 0 }
+    .spacer { flex: 1 }
+    .controls { display: flex; gap: 8px }
+
+    .grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px }
+    .card { background: var(--card); padding: 18px; border-radius: 12px; box-shadow: 0 6px 18px rgba(2,6,23,0.06) }
+
+    label { display: block; font-weight: 600; margin-bottom: 6px }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+    .field { margin-bottom: 12px }
+    input[type="text"], input[type="number"], input[type="url"], select, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12); background: #fff }
+    textarea { min-height: 80px; resize: vertical }
+
+    .btn { appearance: none; border: 1px solid rgba(0,0,0,0.12); background: var(--accent); color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 600 }
+    .btn.secondary { background: transparent; color: var(--fg) }
+    .btn.danger { background: #dc2626; border-color: #dc2626 }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed }
+
+    .toolbar { display:flex; gap: 8px; align-items: center; margin-bottom: 12px }
+    .toolbar input[type="search"] { flex: 1 }
+
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden }
+    thead th { text-align: left; background: rgba(0,0,0,0.04); font-size: 12px; letter-spacing: .02em; color: var(--muted) }
+    th, td { padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.06) }
+    tbody tr:hover { background: rgba(37,99,235,0.05) }
+
+    .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; background: rgba(0,0,0,0.06) }
+    .badge.success { background: #dcfce7; color: #166534 }
+    .badge.dim { background: rgba(0,0,0,0.06); color: #374151 }
+
+    .hint { color: var(--muted); font-size: 12px }
+    .error { color: #dc2626; font-size: 12px }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+
+    @media (max-width: 960px) { .grid { grid-template-columns: 1fr } .row { grid-template-columns: 1fr } }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="container">
+    <header>
+      <h1>Inventory Management</h1>
+      <div class="spacer"></div>
+      <div class="controls">
+        <button id="themeBtn" class="btn secondary" aria-label="Toggle theme">Toggle Theme</button>
+        <button id="exportBtn" class="btn secondary" aria-label="Export items to JSON">Export</button>
+        <label class="sr-only" for="importInput">Import JSON</label>
+        <input id="importInput" type="file" accept="application/json" style="display:none" />
+        <button id="importBtn" class="btn secondary" aria-controls="importInput">Import</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="formTitle">
+        <h2 id="formTitle" style="margin-top:0">Item Form</h2>
+        <form id="inventoryForm" novalidate>
+          <div class="row">
+            <div class="field">
+              <label for="itemName">Item Name<span class="sr-only"> required</span></label>
+              <input id="itemName" name="itemName" type="text" placeholder="e.g., USB-C Cable" required />
+              <div class="error" id="error-itemName" aria-live="polite"></div>
+            </div>
+            <div class="field">
+              <label for="sku">SKU<span class="sr-only"> required</span></label>
+              <input id="sku" name="sku" type="text" placeholder="e.g., USC-001-BLK" required />
+              <div class="hint">Must be unique</div>
+              <div class="error" id="error-sku" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="category">Category</label>
+              <select id="category" name="category">
+                <option value="">Select category</option>
+                <option>Accessories</option>
+                <option>Electronics</option>
+                <option>Apparel</option>
+                <option>Office</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option>Active</option>
+                <option>Discontinued</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="quantity">Quantity</label>
+              <input id="quantity" name="quantity" type="number" min="0" step="1" placeholder="0" />
+            </div>
+            <div class="field">
+              <label for="unitCost">Unit Cost</label>
+              <input id="unitCost" name="unitCost" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="reorderLevel">Reorder Level</label>
+              <input id="reorderLevel" name="reorderLevel" type="number" min="0" step="1" placeholder="e.g., 10" />
+            </div>
+            <div class="field">
+              <label for="location">Location</label>
+              <input id="location" name="location" type="text" placeholder="e.g., Aisle 3, Bin B" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="supplier">Supplier</label>
+              <input id="supplier" name="supplier" type="text" placeholder="e.g., ACME Sdn Bhd" />
+            </div>
+            <div class="field">
+              <label for="imageUrl">Image URL</label>
+              <input id="imageUrl" name="imageUrl" type="url" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Optional details"></textarea>
+          </div>
+
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="btn" type="submit" id="saveBtn">Save Item</button>
+            <button class="btn secondary" type="reset" id="resetBtn">Reset</button>
+            <div id="formMessage" class="hint" aria-live="polite"></div>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="listTitle">
+        <h2 id="listTitle" style="margin-top:0">Items</h2>
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="Search by name or SKU" />
+          <select id="filterCategory">
+            <option value="">All Categories</option>
+            <option>Accessories</option>
+            <option>Electronics</option>
+            <option>Apparel</option>
+            <option>Office</option>
+            <option>Other</option>
+          </select>
+          <select id="filterStatus">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Discontinued</option>
+          </select>
+          <button id="clearFiltersBtn" class="btn secondary">Clear</button>
+        </div>
+
+        <div style="overflow:auto">
+          <table aria-describedby="listTitle">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Qty</th>
+                <th>Unit Cost</th>
+                <th>Stock Value</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTbody"></tbody>
+          </table>
+        </div>
+        <div class="hint" id="emptyState" style="display:none; margin-top:8px">No items yet. Add your first item using the form.</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const dom = {
+      themeBtn: document.getElementById('themeBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      importBtn: document.getElementById('importBtn'),
+      importInput: document.getElementById('importInput'),
+      form: document.getElementById('inventoryForm'),
+      saveBtn: document.getElementById('saveBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      formMessage: document.getElementById('formMessage'),
+      itemsTbody: document.getElementById('itemsTbody'),
+      emptyState: document.getElementById('emptyState'),
+      searchInput: document.getElementById('searchInput'),
+      filterCategory: document.getElementById('filterCategory'),
+      filterStatus: document.getElementById('filterStatus'),
+      clearFiltersBtn: document.getElementById('clearFiltersBtn'),
+      fields: {
+        itemName: document.getElementById('itemName'),
+        sku: document.getElementById('sku'),
+        category: document.getElementById('category'),
+        status: document.getElementById('status'),
+        quantity: document.getElementById('quantity'),
+        unitCost: document.getElementById('unitCost'),
+        reorderLevel: document.getElementById('reorderLevel'),
+        location: document.getElementById('location'),
+        supplier: document.getElementById('supplier'),
+        imageUrl: document.getElementById('imageUrl'),
+        description: document.getElementById('description'),
+      },
+      errors: {
+        itemName: document.getElementById('error-itemName'),
+        sku: document.getElementById('error-sku'),
+      },
+    };
+
+    const STORAGE_KEY = 'inventoryItems:v1';
+    const THEME_KEY = 'inventoryTheme:v1';
+
+    let items = [];
+    let editingItemId = null;
+
+    function generateId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function toNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem(THEME_KEY) || 'light';
+      document.body.setAttribute('data-theme', saved);
+      dom.themeBtn.textContent = saved === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme') || 'light';
+      const next = current === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      dom.themeBtn.textContent = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    function loadItems() {
+      try {
+        items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if (!Array.isArray(items)) items = [];
+      } catch { items = []; }
+    }
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetFormState() {
+      editingItemId = null;
+      dom.saveBtn.textContent = 'Save Item';
+      dom.formMessage.textContent = '';
+      clearErrors();
+      dom.form.reset();
+    }
+
+    function setErrors(errors) {
+      clearErrors();
+      if (errors.itemName) dom.errors.itemName.textContent = errors.itemName;
+      if (errors.sku) dom.errors.sku.textContent = errors.sku;
+    }
+
+    function clearErrors() {
+      dom.errors.itemName.textContent = '';
+      dom.errors.sku.textContent = '';
+    }
+
+    function getFormData() {
+      return {
+        id: editingItemId || generateId(),
+        itemName: dom.fields.itemName.value.trim(),
+        sku: dom.fields.sku.value.trim(),
+        category: dom.fields.category.value.trim(),
+        status: dom.fields.status.value.trim() || 'Active',
+        quantity: toNumber(dom.fields.quantity.value, 0),
+        unitCost: toNumber(dom.fields.unitCost.value, 0),
+        reorderLevel: toNumber(dom.fields.reorderLevel.value, 0),
+        location: dom.fields.location.value.trim(),
+        supplier: dom.fields.supplier.value.trim(),
+        imageUrl: dom.fields.imageUrl.value.trim(),
+        description: dom.fields.description.value.trim(),
+        createdAt: editingItemId ? undefined : new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    function validateItem(proposed) {
+      const errors = {};
+      if (!proposed.itemName) errors.itemName = 'Item name is required';
+      if (!proposed.sku) errors.sku = 'SKU is required';
+      const duplicate = items.find((it) => it.sku.toLowerCase() === proposed.sku.toLowerCase() && it.id !== proposed.id);
+      if (proposed.sku && duplicate) errors.sku = 'SKU must be unique';
+      return errors;
+    }
+
+    function upsertItem(proposed) {
+      const idx = items.findIndex((it) => it.id === proposed.id);
+      if (idx >= 0) items[idx] = { ...items[idx], ...proposed };
+      else items.unshift(proposed);
+      saveItems();
+    }
+
+    function deleteItem(id) {
+      items = items.filter((it) => it.id !== id);
+      saveItems();
+      render();
+    }
+
+    function startEdit(item) {
+      editingItemId = item.id;
+      dom.saveBtn.textContent = 'Update Item';
+      dom.fields.itemName.value = item.itemName || '';
+      dom.fields.sku.value = item.sku || '';
+      dom.fields.category.value = item.category || '';
+      dom.fields.status.value = item.status || 'Active';
+      dom.fields.quantity.value = item.quantity ?? '';
+      dom.fields.unitCost.value = item.unitCost ?? '';
+      dom.fields.reorderLevel.value = item.reorderLevel ?? '';
+      dom.fields.location.value = item.location || '';
+      dom.fields.supplier.value = item.supplier || '';
+      dom.fields.imageUrl.value = item.imageUrl || '';
+      dom.fields.description.value = item.description || '';
+      dom.formMessage.textContent = 'Editing ' + (item.itemName || 'item');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function formatCurrency(n) {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n);
+    }
+
+    function matchesFilters(item) {
+      const q = dom.searchInput.value.trim().toLowerCase();
+      const cat = dom.filterCategory.value;
+      const stat = dom.filterStatus.value;
+      const matchesQuery = !q || item.itemName.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q);
+      const matchesCat = !cat || item.category === cat;
+      const matchesStat = !stat || item.status === stat;
+      return matchesQuery && matchesCat && matchesStat;
+    }
+
+    function render() {
+      const visible = items.filter(matchesFilters);
+      dom.itemsTbody.innerHTML = '';
+      for (const item of visible) {
+        const tr = document.createElement('tr');
+        const stockValue = (Number(item.quantity) || 0) * (Number(item.unitCost) || 0);
+        tr.innerHTML = `
+          <td>
+            <div style="display:flex; align-items:center; gap:10px">
+              ${item.imageUrl ? `<img src="${item.imageUrl}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover" onerror="this.style.display='none'" />` : ''}
+              <div>
+                <div style="font-weight:600">${escapeHtml(item.itemName || '')}</div>
+                <div class="hint">${escapeHtml(item.location || '')}${item.supplier ? ` • ${escapeHtml(item.supplier)}` : ''}</div>
+              </div>
+            </div>
+          </td>
+          <td>${escapeHtml(item.sku)}</td>
+          <td>${escapeHtml(item.category || '')}</td>
+          <td>${Number(item.quantity) || 0}</td>
+          <td>${formatCurrency(Number(item.unitCost) || 0)}</td>
+          <td>${formatCurrency(stockValue)}</td>
+          <td>${item.status === 'Active' ? '<span class="badge success">Active</span>' : '<span class="badge dim">Discontinued</span>'}</td>
+          <td>
+            <div style="display:flex; gap:6px">
+              <button class="btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
+              <button class="btn danger" data-action="delete" data-id="${item.id}">Delete</button>
+            </div>
+          </td>
+        `;
+        dom.itemsTbody.appendChild(tr);
+      }
+      dom.emptyState.style.display = visible.length ? 'none' : 'block';
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"]+/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    // Event listeners
+    dom.themeBtn.addEventListener('click', toggleTheme);
+
+    dom.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const proposed = getFormData();
+      const errors = validateItem(proposed);
+      setErrors(errors);
+      if (Object.keys(errors).length) return;
+      upsertItem(proposed);
+      dom.formMessage.textContent = editingItemId ? 'Item updated' : 'Item saved';
+      resetFormState();
+      render();
+    });
+
+    dom.resetBtn.addEventListener('click', () => {
+      resetFormState();
+    });
+
+    dom.itemsTbody.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.getAttribute('data-action');
+      const id = target.getAttribute('data-id');
+      if (!action || !id) return;
+      const item = items.find((it) => it.id === id);
+      if (!item) return;
+      if (action === 'edit') startEdit(item);
+      if (action === 'delete') {
+        if (confirm('Delete this item?')) deleteItem(id);
+      }
+    });
+
+    for (const el of [dom.searchInput, dom.filterCategory, dom.filterStatus]) {
+      el.addEventListener('input', render);
+      el.addEventListener('change', render);
+    }
+
+    dom.clearFiltersBtn.addEventListener('click', () => {
+      dom.searchInput.value = '';
+      dom.filterCategory.value = '';
+      dom.filterStatus.value = '';
+      render();
+    });
+
+    dom.exportBtn.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'inventory-items.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    dom.importBtn.addEventListener('click', () => dom.importInput.click());
+
+    dom.importInput.addEventListener('change', async () => {
+      const file = dom.importInput.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!Array.isArray(parsed)) throw new Error('Invalid JSON format');
+        // Ensure minimal fields
+        items = parsed.filter(Boolean).map((it) => ({
+          id: it.id || generateId(),
+          itemName: String(it.itemName || ''),
+          sku: String(it.sku || ''),
+          category: String(it.category || ''),
+          status: it.status === 'Discontinued' ? 'Discontinued' : 'Active',
+          quantity: toNumber(it.quantity, 0),
+          unitCost: toNumber(it.unitCost, 0),
+          reorderLevel: toNumber(it.reorderLevel, 0),
+          location: String(it.location || ''),
+          supplier: String(it.supplier || ''),
+          imageUrl: String(it.imageUrl || ''),
+          description: String(it.description || ''),
+          createdAt: it.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+        saveItems();
+        render();
+        dom.formMessage.textContent = 'Import successful';
+      } catch (err) {
+        dom.formMessage.textContent = 'Failed to import: ' + (err?.message || 'Unknown error');
+      } finally {
+        dom.importInput.value = '';
+      }
+    });
+
+    // Init
+    loadTheme();
+    loadItems();
+    render();
+  </script>
+</body>
+</html>
