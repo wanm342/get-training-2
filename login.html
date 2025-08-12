@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-box {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="email"], input[type="password"], button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required>
+        <div id="emailError" class="error"></div>
+        <input type="password" id="password" placeholder="Password" required>
+        <div id="passwordError" class="error"></div>
+        <button type="submit" id="loginBtn">Login</button>
+    </form>
+</div>
+
+<script>
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    const form = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+    const loginBtn = document.getElementById("loginBtn");
+
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        emailError.textContent = "";
+        passwordError.textContent = "";
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        // Validate email format
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            emailError.textContent = "Invalid email format.";
+            return;
+        }
+
+        // Validate password (simple example)
+        if (password.length < 6) {
+            passwordError.textContent = "Password must be at least 6 characters.";
+            return;
+        }
+
+        // Fake check - replace with real authentication
+        if (email === "admin@example.com" && password === "admin123") {
+            alert("Login successful!");
+            attempts = 0;
+        } else {
+            attempts++;
+            if (attempts >= maxAttempts) {
+                alert("Too many failed attempts. Login disabled.");
+                loginBtn.disabled = true;
+            } else {
+                alert(`Invalid credentials. Attempts left: ${maxAttempts - attempts}`);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
